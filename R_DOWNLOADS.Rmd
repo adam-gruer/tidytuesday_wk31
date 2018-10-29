@@ -1,0 +1,83 @@
+---
+title: "R Downloads"
+author: "A Gruer"
+date: "30 October 2018"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r libraries and theme, echo=TRUE}
+library(tidyverse)
+library(lubridate)
+library(qicharts2)
+theme_set(theme_minimal())
+```
+
+
+```{r download data, eval=FALSE, include=FALSE}
+dir.create("data")
+download.file("https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2018-10-30/r_downloads_year.csv", "data/r_downloads_year.csv")
+```
+```{r read data }
+r_downloads_raw <- read.csv("data/r_downloads_year.csv", stringsAsFactors = FALSE)
+
+r_downloads <- r_downloads_raw %>% 
+                    select(-X) %>%
+                    mutate(time = as.POSIXct(paste(date,time),tz="UTC"),
+                          date = as.Date(date)
+                           )
+
+```
+
+There were `r nrow(r_downloads_raw) %>% scales::comma()` downloads of R from the RStudio CRAN mirror between October 20, 2017 and October 20, 2018.
+
+Which versions of R were downloaded 
+Why is 2.1 the most downloaded 2 version?
+```{r downloads by version}
+r_downloads %>%
+  mutate(major_version = substr(version,1,3)) %>%
+  mutate(major_version =  fct_rev( fct_infreq(major_version))) %>%
+  count(major_version) %>%
+  filter(n > 1000) %>%
+ 
+  ggplot(aes(major_version, y = n)) +
+  geom_col() +
+  scale_y_log10(labels=scales::comma) +
+  #theme(axis.text.x = element_text(angle=45,hjust=1)) +
+  theme(panel.grid.major.y =  element_blank()) +
+  coord_flip()+
+  labs(title = "Annual downloads of R by major version (more than 1,000 downloads)",
+       subtitle = "log 10 scale",
+       caption = "source: downloads of R from the RStudio CRAN mirror between October 20, 2017 and October 20, 2018")
+  
+```
+
+Which Operating Systems?
+Windows is by far the most represented operating system
+
+```{r operating system}
+r_downloads %>%
+  mutate(os =  fct_infreq(os)) %>%
+  ggplot(aes(os, fill = os)) +
+  geom_bar(show.legend = FALSE, alpha = 0.75) +
+  scale_y_continuous(labels=scales::comma) +
+  theme(axis.text.x = element_text(angle=45,hjust=1),
+        panel.grid = element_blank(),
+        panel.grid.minor.x = element_blank()) +
+  labs(title = "Annual downloads of R by OS")
+  
+```
+
+Time series of downloads by day
+
+```{r}
+r_downloads %>%
+  
+  count(date) %>%
+  ggplot(aes(x = date, y = n )) + 
+  geom_line()
+```
+
