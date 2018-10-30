@@ -29,7 +29,10 @@ r_downloads <- r_downloads_raw %>%
                     select(-X) %>%
                     mutate(time = as.POSIXct(paste(date,time),tz="UTC"),
                           date = as.Date(date)
-                           )
+                           ) %>%
+  mutate(major_version = substr(version,1,3)) %>%
+  mutate(major_version =  fct_rev( fct_infreq(major_version))) %>%
+   mutate(major_version =  fct_recode(major_version,latest = "lat", development = "dev" )) 
 
 ```
 
@@ -39,9 +42,7 @@ Which versions of R were downloaded
 Why is 2.1 the most downloaded 2 version?
 ```{r downloads by version}
 r_downloads %>%
-  mutate(major_version = substr(version,1,3)) %>%
-  mutate(major_version =  fct_rev( fct_infreq(major_version))) %>%
-   mutate(major_version =  fct_recode(major_version,latest = "lat", development = "dev" )) %>% 
+  
   count(major_version) %>%
   filter(n > 1000) %>%
  
@@ -207,5 +208,11 @@ r_downloads %>%
   geom_col( show.legend = FALSE, alpha = 0.75)
    
 
+```
+
+```{r 2.1 downloads}
+r_downloads %>%
+  filter(major_version == "2.1") %>%
+  count(country)
 ```
 
