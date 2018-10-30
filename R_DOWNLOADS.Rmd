@@ -13,6 +13,7 @@ knitr::opts_chunk$set(echo = TRUE)
 library(tidyverse)
 library(lubridate)
 library(qicharts2)
+library(countrycode)
 theme_set(theme_minimal())
 ```
 
@@ -65,15 +66,15 @@ r_downloads %>%
   ggplot(aes(os, fill = os)) +
   geom_bar(show.legend = FALSE, alpha = 0.75) +
   scale_y_continuous(labels=scales::comma) +
-  theme( 
-        panel.grid = element_blank(),
-        panel.grid.minor.x = element_blank()) +
+  theme(panel.grid = element_blank(),
+        panel.grid.minor.x = element_blank(),
+        axis.text.x = element_text(size = rel(2))) +
   labs(title = "Annual downloads of R by OS",
-       caption =  "source: downloads of R from the RStudio CRAN mirror between October 20, 2017 and October 20, 2018" )
+       caption =  "source: downloads of R from the RStudio CRAN mirror between October 20, 2017 and October 20, 2018" ) 
   
 ```
 
-Time series of downloads by day
+Time series of downloads per day
 
 ```{r}
 r_downloads %>%
@@ -83,6 +84,7 @@ r_downloads %>%
   geom_line()
 ```
 
+Time series of downloads per day by version
 
 ```{r time series by version}
 major_versions <- 
@@ -112,13 +114,64 @@ major_versions <-
     labs(title = "R Downloads per day - 9 most commonly downloaded major versions",
  
           
-       caption =  "source: downloads of R from the RStudio CRAN mirror between October 20, 2017 and October 20, 2018")
+       caption =  "source: downloads of R from the RStudio CRAN mirror between October 20, 2017 and October 20, 2018") 
+  
   
 ```
 
 By Country
+
 ```{r}
-r_dow
-```
  
+r_downloads %>%
+  mutate(country = fct_infreq(country)) %>%
+  count(country) %>%
+  head(9) %>%
+  mutate(countryname = countrycode(country,"iso2c","country.name") )  %>%
+  mutate(countryname = fct_reorder(countryname, n)) %>%
+  ggplot(aes(countryname, n, fill = countryname)) +
+  geom_col(show.legend = FALSE, alpha = 0.75) +
+  scale_y_continuous(labels=scales::comma) +
+  coord_flip()+
+  theme(panel.grid = element_blank(),
+        panel.grid.minor.x = element_blank()) +
+   labs(title = "Annual downloads of R by Country",
+       caption =  "source: downloads of R from the RStudio CRAN mirror between October 20, 2017 and October 20, 2018", x = "" ) 
+  
+
+```
+
+ 
+```{r top 9 countries}
+top_9_countries <-
+      r_downloads %>%
+        mutate(country = fct_infreq(country)) %>%
+        count(country) %>%
+        head(9) %>%
+        pull(country)
+        
+   r_downloads %>%
+   filter(country %in% top_9_countries) %>%
+   mutate(country = fct_infreq(country)) %>%
+  mutate(countryname = countrycode(country,"iso2c","country.name") )  %>%
+  mutate(countryname = fct_infreq(countryname)) %>%
+   count(countryname, date) %>%
+
+  ggplot(aes(date, n)) +
+  geom_line( )  +
+ 
+      theme(axis.text.x = element_text(angle=45,hjust=1),
+        panel.grid = element_blank(),
+        strip.text.x = element_text(face = "bold",size=rel(1.5))
+        
+        )+
+    scale_y_continuous(labels=scales::comma)+
+  facet_wrap(~countryname, scale="free_y") +
+    labs(title = "R Downloads per day - 9 countries with the most annual downloads",
+ 
+          
+       caption =  "source: downloads of R from the RStudio CRAN mirror between October 20, 2017 and October 20, 2018") 
+  
+
+```
  
