@@ -303,3 +303,12 @@ r_downloads %>%
   count(country)
 ```
 
+
+```{r christmas downloads}
+r_downloads %>%
+  filter(date == as.Date("2017-12-25") ) %>%
+  mutate(countryname = countrycode(country,"iso2c","country.name") )  %>%
+  mutate(countryname = fct_infreq(countryname)) %>%
+  count(countryname) 
+```
+
