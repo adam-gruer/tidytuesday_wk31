@@ -40,11 +40,12 @@ Why is 2.1 the most downloaded 2 version?
 r_downloads %>%
   mutate(major_version = substr(version,1,3)) %>%
   mutate(major_version =  fct_rev( fct_infreq(major_version))) %>%
+   mutate(major_version =  fct_recode(major_version,latest = "lat", development = "dev" )) %>% 
   count(major_version) %>%
   filter(n > 1000) %>%
  
-  ggplot(aes(major_version, y = n)) +
-  geom_col() +
+  ggplot(aes(major_version, y = n, fill = major_version)) +
+  geom_col(  alpha = 0.75) +
   scale_y_log10(labels=scales::comma) +
   #theme(axis.text.x = element_text(angle=45,hjust=1)) +
   theme(panel.grid.major.y =  element_blank()) +
@@ -64,10 +65,11 @@ r_downloads %>%
   ggplot(aes(os, fill = os)) +
   geom_bar(show.legend = FALSE, alpha = 0.75) +
   scale_y_continuous(labels=scales::comma) +
-  theme(axis.text.x = element_text(angle=45,hjust=1),
+  theme( 
         panel.grid = element_blank(),
         panel.grid.minor.x = element_blank()) +
-  labs(title = "Annual downloads of R by OS")
+  labs(title = "Annual downloads of R by OS",
+       caption =  "source: downloads of R from the RStudio CRAN mirror between October 20, 2017 and October 20, 2018" )
   
 ```
 
@@ -79,5 +81,43 @@ r_downloads %>%
   count(date) %>%
   ggplot(aes(x = date, y = n )) + 
   geom_line()
+```
+
+
+```{r time series by version}
+major_versions <- 
+  r_downloads %>%
+  mutate(major_version = substr(version,1,3)) %>%
+  mutate(major_version =  fct_rev( fct_infreq(major_version))) %>%
+  count(major_version) %>%
+  filter(n > 1000) %>%
+  pull(major_version)
+
+  r_downloads %>%
+  mutate(major_version = substr(version,1,3)) %>%
+  mutate(major_version =  fct_rev( fct_infreq(major_version))) %>%
+  filter(major_version %in% major_versions) %>%
+   mutate(major_version =  fct_rev(major_version)) %>% 
+    mutate(major_version =  fct_recode(major_version,latest = "lat", development = "dev" )) %>% 
+  count(date,major_version) %>%
+  ggplot(aes(x = date, y = n )) + 
+  geom_line() +
+  
+      theme(axis.text.x = element_text(angle=45,hjust=1),
+        panel.grid = element_blank(),
+        strip.text.x = element_text(face = "bold",size=rel(1.5))
+        
+        )+
+    scale_y_continuous(labels=scales::comma)+
+  facet_wrap(~major_version, scale="free_y") +
+    labs(title = "R Downloads per day - 9 most commonly downloaded major versions",
+          
+       caption =  "source: downloads of R from the RStudio CRAN mirror between October 20, 2017 and October 20, 2018")
+  
+```
+
+By Country
+```{r}
+r_dow
 ```
 
