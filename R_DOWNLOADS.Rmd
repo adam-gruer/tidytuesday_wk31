@@ -121,7 +121,7 @@ major_versions <-
 
 By Country
 
-```{r}
+```{r downloads by country}
  
 r_downloads %>%
   mutate(country = fct_infreq(country)) %>%
@@ -137,7 +137,25 @@ r_downloads %>%
         panel.grid.minor.x = element_blank()) +
    labs(title = "Annual downloads of R by Country",
        caption =  "source: downloads of R from the RStudio CRAN mirror between October 20, 2017 and October 20, 2018", x = "" ) 
-  
+```
+
+Download by continent
+
+```{r downloads by continent}
+ 
+r_downloads %>%
+  mutate(continent =       countrycode(country,"iso2c","continent") )  %>%
+    mutate(country_name =       countrycode(country,"iso2c","country.name") )  %>%
+  count(continent) %>%
+  mutate(continent = fct_reorder(continent, n)) %>%
+  ggplot(aes(continent, n, fill = continent)) +
+  geom_col(show.legend = FALSE, alpha = 0.75) +
+  scale_y_continuous(labels=scales::comma) +
+  coord_flip()+
+  theme(panel.grid = element_blank(),
+        panel.grid.minor.x = element_blank()) +
+   labs(title = "Annual downloads of R by Continent",
+       caption =  "source: downloads of R from the RStudio CRAN mirror between October 20, 2017 and October 20, 2018", x = "" )
 
 ```
 
