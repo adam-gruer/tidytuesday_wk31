@@ -102,7 +102,7 @@ major_versions <-
   count(date,major_version) %>%
   ggplot(aes(x = date, y = n )) + 
   geom_line() +
-  
+ 
       theme(axis.text.x = element_text(angle=45,hjust=1),
         panel.grid = element_blank(),
         strip.text.x = element_text(face = "bold",size=rel(1.5))
@@ -111,6 +111,7 @@ major_versions <-
     scale_y_continuous(labels=scales::comma)+
   facet_wrap(~major_version, scale="free_y") +
     labs(title = "R Downloads per day - 9 most commonly downloaded major versions",
+ 
           
        caption =  "source: downloads of R from the RStudio CRAN mirror between October 20, 2017 and October 20, 2018")
   
@@ -120,4 +121,5 @@ By Country
 ```{r}
 r_dow
 ```
-
+ 
+ 
