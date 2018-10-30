@@ -194,3 +194,18 @@ top_9_countries <-
 
 ```
  
+
+Downloads per day of week
+```{r downloads per day of week}
+r_downloads %>%
+  select(date) %>%
+    mutate(wday = wday(date,label = TRUE)) %>%
+  select(wday) %>%
+  count(wday) %>%
+  mutate(wday = fct_relevel(wday , c("Mon","Tue","Wed","Thu","Fri","Sat","Sun"))) %>%
+  ggplot(aes(wday,n, fill = wday)) +
+  geom_col( show.legend = FALSE, alpha = 0.75)
+   
+
+```
+
